@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-size: cover;
+            background-position: center;
+            backdrop-filter: blur(5px);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: auto;
+            transition: background-image 1s ease;
+        }
+
+        .container {
+            background-color: rgba(34, 40, 49, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 400px;
+        }
+
+        .container:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.9);
+        }
+
+        #typed-output {
+            font-family: 'Lilita One', cursive;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8);
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        input[type="text"] {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: border-color 0.3s, background-color 0.3s, transform 0.3s;
+        }
+
+        input[type="text"]:hover {
+            border-color: #4CAF50;
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.02);
+        }
+
+        button {
+            background-color: rgb(0, 173, 181);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s, box-shadow 0.3s;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        button:hover {
+            background-color: #4CAF50;
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        #result {
+            margin-top: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            color: white;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        li:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+            animation: bounce 0.5s;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .team-red { background-color: #ff4d4d; }
+        .team-green { background-color: #28a745; }
+        .team-blue { background-color: #007bff; }
+        .team-yellow { background-color: #ffc107; }
+        .team-purple { background-color: #6f42c1; }
+
+        .hidden {
+            display: none;
+        }
+
+        footer {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .footer-button {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+        }
+
+        .footer-button:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .footer-button img {
+            margin-right: 5px;
+        }
+
+        .footer-text {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #fff;
+            opacity: 0.7;
+        }
+
+        .loading-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #007bff;
+            border-radius: 5px;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="typed-output"></div>
+        <form id="teamForm">
+            <div class="name-fields" id="nameFields">
+                <input type="text" id="name1" placeholder="Name 1" required>
+                <input type="text" id="name2" placeholder="Name 2" required>
+                <input type="text" id="name3" placeholder="Name 3" required>
+                <input type="text" id="name4" placeholder="Name 4" required>
+            </div>
+            <button type="button" id="addBtn" onclick="addFields()">+2</button>
+            <button type="button" onclick="generateTeams()">Teams erstellen</button>
+            <button type="button" class="hidden" id="newEntryBtn" onclick="resetForm()">Neue Eingabe</button>
+        </form>
+        <div class="loading-bar hidden" id="loadingBar"></div>
+        <div id="result"></div>
+        <div class="footer-text">from Launii with ♥</div>
+    </div>
+
+    <footer>
+        <a href="https://steamcommunity.com/id/217erss/" class="footer-button" target="_blank">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_bjGqfYSqqfwCPVNXJJOHE06KIUjyfWhmmQ&s" alt="Steam Logo" style="width: 20px; vertical-align: middle;"> Mein Steam
+        </a>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var options = {
+                strings: ["Team Generator", "Teamauswahl", "Erstelle dein Team jetzt!"],
+                typeSpeed: 90,
+                backSpeed: 30,
+                loop: false,
+                cursorChar: '|',
+                showCursor: true
+            };
+
+            var typed = new Typed("#typed-output", options);
+
+            // Hintergrundbild-URLs
+            const backgroundImages = [
+                'https://i.ibb.co/n3KsWpd/leaf-8687801-1920.jpg',
+                'https://i.ibb.co/FBRYGFb/paddle-boat-8253274-1920.jpg',
+                'https://i.ibb.co/zxSYdX4/nature-9006428-1920.jpg'
+            ];
+
+            // Wähle ein zufälliges Hintergrundbild aus
+            function changeBackgroundImage() {
+                const randomImage = backgroundImages[Math.floor(Math.random() * backgroundImages.length)];
+                document.body.style.backgroundImage = `url(${randomImage})`;
+            }
+
+            changeBackgroundImage();
+
+            document.getElementById('newEntryBtn').addEventListener('click', changeBackgroundImage);
+        });
+
+        let currentCount = 4;
+
+        function addFields() {
+            if (currentCount < 10) {
+                const nameFields = document.getElementById('nameFields');
+                for (let i = 0; i < 2; i++) {
+                    currentCount++;
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = 'name' + currentCount;
+                    input.placeholder = 'Name ' + currentCount;
+                    input.required = true;
+                    nameFields.appendChild(input);
+                }
+            }
+
+            if (currentCount >= 10) {
+                document.getElementById('addBtn').style.display = 'none';
+            }
+        }
+
+        function generateTeams() {
+            const names = [];
+            for (let i = 1; i <= currentCount; i++) {
+                const name = document.getElementById('name' + i).value;
+                if (name.trim()) {
+                    names.push(name.trim());
+                }
+            }
+
+            if (names.length < 4 || names.length % 2 !== 0) {
+                alert('Bitte gib mindestens 4 Namen ein und stelle sicher, dass die Anzahl gerade ist.');
+                return;
+            }
+
+            document.getElementById('loadingBar').classList.remove('hidden');
+            let width = 0;
+            const loadingInterval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(loadingInterval);
+                    document.getElementById('loadingBar').classList.add('hidden');
+                    displayTeams(names);
+                } else {
+                    width++;
+                    document.getElementById('loadingBar').style.width = width + '%';
+                }
+            }, 40);  // 40ms entspricht ca. 4 Sekunden für 100%
+        }
+
+        function displayTeams(names) {
+            shuffleArray(names);
+            const teams = [];
+            for (let i = 0; i < names.length; i += 2) {
+                teams.push([names[i], names[i + 1]]);
+            }
+
+            let resultHTML = '<ul>';
+            const teamColors = ['team-red', 'team-green', 'team-blue', 'team-yellow', 'team-purple'];
+            for (let i = 0; i < teams.length; i++) {
+                resultHTML += `<li class="${teamColors[i % teamColors.length]}">Team ${i + 1}: ${teams[i][0]} & ${teams[i][1]}</li>`;
+            }
+            resultHTML += '</ul>';
+
+            document.getElementById('result').innerHTML = resultHTML;
+            document.getElementById('newEntryBtn').classList.remove('hidden');
+            triggerConfetti();
+        }
+
+        function resetForm() {
+            document.getElementById('teamForm').reset();
+            document.getElementById('result').innerHTML = '';
+            currentCount = 4;
+            document.getElementById('nameFields').innerHTML = `
+                <input type="text" id="name1" placeholder="Name 1" required>
+                <input type="text" id="name2" placeholder="Name 2" required>
+                <input type="text" id="name3" placeholder="Name 3" required>
+                <input type="text" id="name4" placeholder="Name 4" required>
+            `;
+            document.getElementById('addBtn').style.display = 'inline-block';
+            document.getElementById('newEntryBtn').classList.add('hidden');
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function triggerConfetti() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+    </script>
+</body>
+</html>
